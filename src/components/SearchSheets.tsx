@@ -35,9 +35,13 @@ export default function SearchSheets(props: IProps) {
             return;
         }
 
+        const now = Date.now();
+
         setIsSeeking(true)
         seek().then(() => {
             setIsSeeking(false);
+            console.log(Date.now() - now);
+            
         });
     }
 
