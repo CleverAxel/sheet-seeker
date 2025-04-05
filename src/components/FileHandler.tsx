@@ -1,8 +1,11 @@
 import { createSignal, For, Show } from "solid-js";
-import { createStore } from "solid-js/store"
+import { createStore, produce, SetStoreFunction } from "solid-js/store"
 import clickOutside from "../directives/clickOutside";
 
+const excelExtension = ".xlsm";
+
 //https://github.com/solidjs/solid/discussions/564
+//https://techoverflow.net/2021/11/26/how-to-compute-sha-hash-of-local-file-in-javascript-using-subtlecrypto-api/
 true && clickOutside;
 
 export interface FileHandlerRef {
@@ -48,7 +51,7 @@ export default function FileHandler(props: { ref: any }) {
         target: Element;
     }) => {
         e.preventDefault();
-        const newFiles = Array.from(e.dataTransfer!.files).filter((file) => file.name.endsWith(".xlsm"));
+        const newFiles = Array.from(e.dataTransfer!.files).filter((file) => file.name.endsWith(excelExtension));
         setFileStore("files", (prevFiles) => [...prevFiles, ...newFiles]);
     }
 
@@ -56,6 +59,26 @@ export default function FileHandler(props: { ref: any }) {
         let filesClone = [...fileStore.files];
         filesClone.splice(index, 1);
         setFileStore("files", filesClone);
+    }
+
+    const uniqueFiles = () => {
+        const seen = new Set();
+        const uniqueFiles:File[] = [];
+
+        for (const file of fileStore.files) {
+            const key = `${file.name}-${file.size}`;
+
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueFiles.push(file);
+            }
+        }
+
+        setFileStore("files", uniqueFiles);
+    }
+
+    const emptyFiles = () => {
+        setFileStore("files", []);
     }
 
     return (
@@ -72,11 +95,16 @@ export default function FileHandler(props: { ref: any }) {
                     onDrop={onDropDropZone}>
                     <div class="text-center">&#x2752;</div>
                     <div class="text-center"><span>Glissez et déposez vos fichiers ici ou cliquez pour ouvrir votre explorateur de fichiers.</span></div>
-                    <input onChange={onChangeFileInput} ref={fileInputRef} type="file" multiple hidden accept=".xlsm" />
+                    <input onChange={onChangeFileInput} ref={fileInputRef} type="file" multiple hidden accept={excelExtension} />
+                </div>
+
+                <div class="flex gap-1 mt-1 text-sm">
+                    <button onClick={uniqueFiles} class="grow px-1 bg-slate-700 text-white hover:bg-slate-600 rounded-md py-2">Supprimer les possibles doublons</button>
+                    <button onClick={emptyFiles} class=" px-2 bg-slate-700 text-white hover:bg-slate-600 rounded-md py-2">Vider la liste</button>
                 </div>
 
                 <Show when={('showDirectoryPicker' in window)}>
-                    <FileSystemAPI></FileSystemAPI>
+                    <FileSystemAPI setFileStore={setFileStore}></FileSystemAPI>
                 </Show>
 
                 <div><i>Le programme devra analyser : {fileStore.files.length} fichier(s).</i></div>
@@ -99,8 +127,12 @@ export default function FileHandler(props: { ref: any }) {
 }
 
 
-
-function FileSystemAPI() {
+interface IPropsFileAPI {
+    setFileStore: SetStoreFunction<{
+        files: File[];
+    }>
+}
+function FileSystemAPI(props: IPropsFileAPI) {
     const [togglePopUp, setTogglePopUP] = createSignal(false);
 
     const startScan = async () => {
@@ -108,20 +140,24 @@ function FileSystemAPI() {
         await scanDirectoryRecursive(dirHandle);
     }
 
-    const scanDirectoryRecursive = async (dirHandle:FileSystemDirectoryHandle, path = "") => {
+    const scanDirectoryRecursive = async (dirHandle: FileSystemDirectoryHandle, path = "") => {
         for await (const entry of dirHandle.values()) {
             const fullPath = `${path}/${entry.name}`;
-    
+
             if (entry.kind === "file") {
-                console.log(`📄 File: ${fullPath}`);
+                const file = await entry.getFile();
+                if (file.name.endsWith(excelExtension)) {
+                    props.setFileStore(produce(store => store.files.push(file)));
+                }
+                // console.log(`📄 File: ${fullPath}`);
             } else if (entry.kind === "directory") {
-                console.log(`📁 Folder: ${fullPath}`);
-                // Recursively scan subdirectory
+                // console.log(`📁 Folder: ${fullPath}`);
+                // // Recursively scan subdirectory
                 await scanDirectoryRecursive(entry, fullPath);
             }
         }
     }
-    
+
 
     return (
         <div class="border-t border-gray-300 border-b my-5 py-3" >
@@ -178,7 +214,7 @@ function ModalExplanationFileSystemAPI(props: { setTogglePopUp: any }) {
 
 
 function FileDetails(props: { index: number; fileName: string; fileSize: number; isDuplicate: boolean; removeFileCallback: (index: number) => void; }) {
-    
+
     const formatFileSize = (bytes: number) => {
         const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes === 0) return '0 Bytes';

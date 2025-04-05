@@ -30,7 +30,7 @@ worker.onmessage = ({ data }) => {
                     return;
                 }
 
-                if (getCellValue(sheet.getCell(EnumSheetField.cabNumber)) && normalizeString(getCellValue(sheet.getCell(EnumSheetField.cabNumber)) as string, file, sheet.name) == search) {
+                if (getCellValue(sheet.getCell(EnumSheetField.cabNumber)) && normalizeString(getCellValue(sheet.getCell(EnumSheetField.cabNumber)) as string) == search) {
 
                     let infringements: IInfringementAndComments[] = [];
 
@@ -42,6 +42,7 @@ worker.onmessage = ({ data }) => {
 
                     let report: IAuditVisitReport = {
                         filename: file.name,
+                        sheetName : sheet.name,
                         assignmentOrder: getCellValue(sheet.getCell(EnumAssignmentOrder.first)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.second)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.third)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.forth)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.fifth)),
                         cabNumber: getCellValue(sheet.getCell(EnumSheetField.cabNumber)),
                         date: getCellValue(sheet.getCell(EnumSheetField.date)) instanceof Date ? formatDateToString(getCellValue(sheet.getCell(EnumSheetField.date))) : getCellValue(sheet.getCell(EnumSheetField.date)),
@@ -62,32 +63,25 @@ worker.onmessage = ({ data }) => {
 
             });
 
-            worker.postMessage(reports);
+            worker.postMessage({reports, processedSheetsCount: workbook.worksheets.length});
         } catch (error) {
             throw Error("Failure web worker | ExcelJs");
         }
     };
 
     fileReader.onerror = () => {throw Error("Failure web worker | File Reader")};
-    
-    fileReader.readAsArrayBuffer(file);
-    // if (data instanceof Array) {
-    //     worker.postMessage(data.join(' ') + '!');
-    // }
+    try{
+        //lance une erreur disant qu'il n'y a pas accès what ever
+        fileReader.readAsArrayBuffer(file);
+    } catch {
+    };
 };
 
-function normalizeString(str: string): string;
-function normalizeString(str: string, file: File, sheetName: string): string | null;
-function normalizeString(str: string, file?: File, sheetName?: string): string | null {
+
+function normalizeString(str: string): string | null {
     try {
         return str._removeUselessBlanks()._toAscii().toUpperCase();
     } catch (e) {
-        if (!file && !sheetName) {
-            throw e;
-        }
-
-        // unCommonCabNumbers.push({ fileName: file!.name, sheetName: sheetName! });
-
         return null;
     }
 }
