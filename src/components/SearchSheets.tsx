@@ -12,7 +12,7 @@ interface IProps {
 export default function SearchSheets(props: IProps) {
 
     const originalDocumentTitle = document.title;
-    const soundSearchDone = new Audio("/notification_done.mp3");
+    const soundSearchDone = new Audio(`${import.meta.env.BASE_URL}/notification_done.mp3`);
     const [isSeeking, setIsSeeking] = createSignal(false);
     const [processedSheetCount, setProcessedSheetCount] = createSignal(0);
     const [processedFileCount, setProcessedFileCount] = createSignal(0);
