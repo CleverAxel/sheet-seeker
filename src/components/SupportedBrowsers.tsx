@@ -1,7 +1,13 @@
-export function SupportedBrowsers() {
+import { Show } from "solid-js";
+
+interface IProps {
+    hasSupport:boolean,
+}
+
+export function SupportedBrowsers(props:IProps) {
     return (
-        <div class="max-w-5xl mx-auto mt-5">
-            <h5 class="text-lg font-thin">Malheureusement ce programme utilise des fonctionnalités assez "récentes" pour son bon fonctionnement. Donc, si vous le pouvez, mettez à jour vos navigateurs webs.</h5>
+        <div class="max-w-5xl mx-auto mt-5 p-3">
+            <h5 class="text-lg font-thin">Malheureusement ce programme utilise des fonctionnalités assez "récentes" pour son bon fonctionnement. Donc, si vous le pouvez, mettez à jour vos navigateurs web.</h5>
             <h5 class="text-lg font-bold">Voici la liste des navigateurs supportés :</h5>
             <ul class="pl-4 list-disc">
                 <li>Chrome 80 (Sorti le : 2020-02-04) </li>
@@ -16,6 +22,12 @@ export function SupportedBrowsers() {
                 <li>Opera Android 57 (Sorti le : 2020-03-30) </li>
                 <li>Safari on iOS 15 (Sorti le : 2021-09-20) </li>
             </ul>
+
+            <Show when={!props.hasSupport}>
+                <div class="text-red-700">
+                    <b>Votre navigateur ne supporte pas une ou des fonctionnalités du site :(</b>
+                </div>
+            </Show>
         </div>
     )
 }

@@ -7,10 +7,10 @@ import FileHandler, { FileHandlerRef } from "./components/FileHandler";
 import SearchSheets from "./components/SearchSheets";
 import { SupportedBrowsers } from "./components/SupportedBrowsers";
 
-const version = "1.0.0";
+const version = "1.1.0";
 
 function App() {
-    const [selectTab, setSelectedTab] = createSignal(EnumTab.fileHandler);
+    const [selectTab, setSelectedTab] = createSignal(!hasWebWorkerModuleSupport() ? EnumTab.supportedBrowsers : EnumTab.fileHandler);
     let fileComponentRef: FileHandlerRef | undefined;
 
     const getFiles = () => {
@@ -30,7 +30,7 @@ function App() {
                     <SearchSheets callbackGetFiles={getFiles}></SearchSheets>
                 </div>
                 <div hidden={selectTab() != EnumTab.supportedBrowsers}>
-                    <SupportedBrowsers></SupportedBrowsers>
+                    <SupportedBrowsers hasSupport={hasWebWorkerModuleSupport()}></SupportedBrowsers>
                 </div>
             </main>
             <footer class="mt-auto">
@@ -38,6 +38,19 @@ function App() {
             </footer>
         </>
     )
+}
+
+function hasWebWorkerModuleSupport(){
+    try {
+        const blob = new Blob([""], { type: "application/javascript" });
+        const url = URL.createObjectURL(blob);
+        const worker = new Worker(url, { type: "module" });
+        worker.terminate();
+        URL.revokeObjectURL(url);
+        return true;
+      } catch (e) {
+        return false;
+      }
 }
 
 export default App
