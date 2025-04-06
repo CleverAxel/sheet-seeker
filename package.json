@@ -1,15 +1,19 @@
 {
   "name": "sheet-seeker-ts",
+  "homepage": "https://cleveraxel.github.io/sheet-seeker/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d dist"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
+    "gh-pages": "^6.3.0",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "solid-js": "^1.9.5"
