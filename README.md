@@ -1,4 +1,4 @@
-# Analyseur de Cabines - Excel vers PDF
+# Sheet Seeker
 
 Ce programme permet d'analyser des fichiers Excel contenant des données sur des cabines. Il vérifie si l'une des feuilles d'un fichier correspond à un numéro de cabine donné par l'utilisateur, puis affiche les informations de manière lisible et permet de les exporter au format PDF.
 

@@ -5,8 +5,9 @@ import Tabs from "./components/layouts/Tabs"
 import { EnumTab } from "./enums/tabs";
 import FileHandler, { FileHandlerRef } from "./components/FileHandler";
 import SearchSheets from "./components/SearchSheets";
+import { SupportedBrowsers } from "./components/SupportedBrowsers";
 
-
+const version = "1.0.0";
 
 function App() {
     const [selectTab, setSelectedTab] = createSignal(EnumTab.fileHandler);
@@ -19,14 +20,22 @@ function App() {
     return (
         <>
             <Header></Header>
-            <Tabs selectTab={selectTab} setSelectTab={setSelectedTab}></Tabs>
+            <main class="grow">
+                <Tabs selectTab={selectTab} setSelectTab={setSelectedTab}></Tabs>
 
-            <div hidden={selectTab() != EnumTab.fileHandler}>
-                <FileHandler ref={fileComponentRef}></FileHandler>
-            </div>
-            <div hidden={selectTab() != EnumTab.searchSheets}>
-                <SearchSheets callbackGetFiles={getFiles}></SearchSheets>
-            </div>
+                <div hidden={selectTab() != EnumTab.fileHandler}>
+                    <FileHandler ref={fileComponentRef}></FileHandler>
+                </div>
+                <div hidden={selectTab() != EnumTab.searchSheets}>
+                    <SearchSheets callbackGetFiles={getFiles}></SearchSheets>
+                </div>
+                <div hidden={selectTab() != EnumTab.supportedBrowsers}>
+                    <SupportedBrowsers></SupportedBrowsers>
+                </div>
+            </main>
+            <footer class="mt-auto">
+                <div class="flex p-3 mx-auto justify-end text-sm"><i>V.{version}</i></div>
+            </footer>
         </>
     )
 }

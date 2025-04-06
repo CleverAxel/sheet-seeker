@@ -17,6 +17,9 @@ export default function Tabs(props: IProps) {
                     <Tab onClick={() => props.setSelectTab(EnumTab.searchSheets)} isActive={props.selectTab() == EnumTab.searchSheets}>
                         Réaliser une recherche parmi les fichiers importés
                     </Tab>
+                    <Tab onClick={() => props.setSelectTab(EnumTab.supportedBrowsers)} isActive={props.selectTab() == EnumTab.supportedBrowsers}>
+                        Navigateurs web supportés
+                    </Tab>
                 </div>
             </div>
         </nav>

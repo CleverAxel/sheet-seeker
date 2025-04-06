@@ -1,4 +1,5 @@
 export enum EnumTab {
     fileHandler,
-    searchSheets
+    searchSheets,
+    supportedBrowsers,
 }
