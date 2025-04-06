@@ -1,28 +1,23 @@
-## Usage
+# Analyseur de Cabines - Excel vers PDF
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+Ce programme permet d'analyser des fichiers Excel contenant des données sur des cabines. Il vérifie si l'une des feuilles d'un fichier correspond à un numéro de cabine donné par l'utilisateur, puis affiche les informations de manière lisible et permet de les exporter au format PDF.
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+## ✨ Fonctionnalités
 
-## Available Scripts
+- 📂 Prise en charge de fichiers Excel `.xlsm`, `.xls`, `xlsx` en entrée
+- 🔍 Analyse automatique de **toutes les feuilles** de chaque fichier
+- 🆔 Vérification du **numéro de cabine**
+- 🧾 Affichage des données au **format lisible**
+- 📄 Génération d'un **PDF téléchargeable**
 
-In the project directory, you can run:
+## ⚙️ Utilisation
 
-### `npm run dev`
+1. **Lancer le site**
+2. **Choisir un ou plusieurs fichiers Excel**
+3. **Entrer le numéro de cabine recherché**
+4. Le programme affiche les feuilles correspondant au numéro entré
+5. Option de **téléchargement en PDF** disponible pour chaque résultat
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+## 🗂 Structure des fichiers attendus
 
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+Chaque fichier Excel peut contenir plusieurs feuilles. Chaque feuille doit avoir un champ ou un emplacement contenant un **numéro de cabine identifiable**.

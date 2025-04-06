@@ -2,7 +2,7 @@ import { createSignal, For, Show } from "solid-js";
 import { createStore, produce, SetStoreFunction } from "solid-js/store"
 import clickOutside from "../directives/clickOutside";
 
-const excelExtension = ".xlsm";
+const excelExtensions = [".xlsm", ".xls", ".xlsx"];
 
 //https://github.com/solidjs/solid/discussions/564
 //https://techoverflow.net/2021/11/26/how-to-compute-sha-hash-of-local-file-in-javascript-using-subtlecrypto-api/
@@ -42,7 +42,9 @@ export default function FileHandler(props: { ref: any }) {
         currentTarget: HTMLInputElement;
         target: HTMLInputElement;
     }) => {
-        setFileStore("files", (prevFiles) => [...prevFiles, ...Array.from(e.target.files!).filter((file) => file.name.endsWith(excelExtension))]);
+        setFileStore("files", (prevFiles) => [...prevFiles, ...Array.from(e.target.files!).filter((file) =>
+            excelExtensions.some((ext) => file.name.endsWith(ext))
+        )]);
         e.target.value = "";
     }
 
@@ -51,7 +53,9 @@ export default function FileHandler(props: { ref: any }) {
         target: Element;
     }) => {
         e.preventDefault();
-        const newFiles = Array.from(e.dataTransfer!.files).filter((file) => file.name.endsWith(excelExtension));
+        const newFiles = Array.from(e.dataTransfer!.files).filter((file) =>
+            excelExtensions.some((ext) => file.name.endsWith(ext))
+        );
         setFileStore("files", (prevFiles) => [...prevFiles, ...newFiles]);
     }
 
@@ -63,7 +67,7 @@ export default function FileHandler(props: { ref: any }) {
 
     const uniqueFiles = () => {
         const seen = new Set();
-        const uniqueFiles:File[] = [];
+        const uniqueFiles: File[] = [];
 
         for (const file of fileStore.files) {
             const key = `${file.name}-${file.size}`;
@@ -95,7 +99,8 @@ export default function FileHandler(props: { ref: any }) {
                     onDrop={onDropDropZone}>
                     <div class="text-center">&#x2752;</div>
                     <div class="text-center"><span>Glissez et déposez vos fichiers ici ou cliquez pour ouvrir votre explorateur de fichiers.</span></div>
-                    <input onChange={onChangeFileInput} ref={fileInputRef} type="file" multiple hidden accept={excelExtension} />
+                    <div class="text-center mt-2 text-xs"><i>({excelExtensions.join(", ")})</i></div>
+                    <input onChange={onChangeFileInput} ref={fileInputRef} type="file" multiple hidden accept={excelExtensions.join(",")} />
                 </div>
 
                 <div class="flex gap-1 mt-1 text-sm">
@@ -146,13 +151,12 @@ function FileSystemAPI(props: IPropsFileAPI) {
 
             if (entry.kind === "file") {
                 const file = await entry.getFile();
-                if (file.name.endsWith(excelExtension)) {
-                    props.setFileStore(produce(store => store.files.push(file)));
+                if (excelExtensions.some(ext => file.name.endsWith(ext))) {
+                    props.setFileStore(produce(store => {
+                        store.files.push(file);
+                    }));
                 }
-                // console.log(`📄 File: ${fullPath}`);
             } else if (entry.kind === "directory") {
-                // console.log(`📁 Folder: ${fullPath}`);
-                // // Recursively scan subdirectory
                 await scanDirectoryRecursive(entry, fullPath);
             }
         }

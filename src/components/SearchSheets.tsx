@@ -51,28 +51,25 @@ export default function SearchSheets(props: IProps) {
 
     const onSearchClick = () => {
         cabSearch = inputRef.value.trim();
-        if (isSeeking() || inputRef.value.trim() == "") {
+        if (isSeeking() || cabSearch == "" ) {
+            return;
+        }
+        const files = props.callbackGetFiles();
+        if (files.length == 0) {
+            window.alert("Aucun fichier importé. Allez dans l'onglet 'Importer les fichiers à rechercher' pour y importer des fichiers.");
             return;
         }
         const now = Date.now();
         setAuditVisitReports([]);
         setIsSeeking(true)
 
-        seek().then(() => {
-            console.log(Date.now() - now);
-
-            setIsSeeking(false);
-            console.log(Date.now() - now);
-            
+        seek(files).then(() => {
+            console.log("Took : " + (Date.now() - now).toString() + "ms");
+            setIsSeeking(false);            
         });
     }
 
-    const seek = async () => {
-        const files = props.callbackGetFiles();
-        if (files.length == 0) {
-            window.alert("Aucun fichier importé. Allez dans l'onglet 'Importer les fichiers [...]' pour y importer des fichiers.");
-            return;
-        }
+    const seek = async (files:File[]) => {
         setTotalFiles(files.length);
         let workBook = new WorkBookSearch(files, sheetsToSkip);
 
@@ -93,10 +90,9 @@ export default function SearchSheets(props: IProps) {
         const seenReports = new Map<string, { report: IAuditVisitReport, duplicates: { filename: string, sheetName: string }[] }>();  // To track unique reports with duplicates
 
         for (const report of reports) {
-            // Normalize the report (excluding the filename and sheetName)
             const normalizedReport = {
-                filename: report.filename,  // Don't change the filename to uppercase
-                sheetName: report.sheetName, // Don't normalize the sheetName either
+                filename: report.filename,
+                sheetName: report.sheetName,
                 assignmentOrder: normalizeValue(report.assignmentOrder),
                 cabNumber: normalizeValue(report.cabNumber),
                 address: normalizeValue(report.address),
@@ -125,7 +121,6 @@ export default function SearchSheets(props: IProps) {
             }
         }
 
-        // Collect the unique reports along with their duplicates
         uniqueReports.push(...Array.from(seenReports.values()));
         return uniqueReports.map((report) => {
             return {
