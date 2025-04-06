@@ -23,6 +23,7 @@ export default function SearchSheets(props: IProps) {
     const [singleVisitReport, setSingleVisitReport] = createSignal<IAuditVisitReport>();
 
     const [toggleInfringementsDisplay, setToggleInfringementsDisplay] = createSignal(false);
+    let cabSearch = "";
 
     const sheetsToSkip = ["Liste cabines", "Phrases codifiées", "Données"];
     let inputRef!: HTMLInputElement;
@@ -49,6 +50,7 @@ export default function SearchSheets(props: IProps) {
     })
 
     const onSearchClick = () => {
+        cabSearch = inputRef.value.trim();
         if (isSeeking() || inputRef.value.trim() == "") {
             return;
         }
@@ -147,7 +149,8 @@ export default function SearchSheets(props: IProps) {
 
                 <Show when={!isSeeking()}>
                     <div class="max-w-lg mt-2 flex">
-                        <input value={"61R00132"} onkeydown={(e) => { if (e.key.toUpperCase() == "ENTER") { onSearchClick() } }} ref={inputRef} disabled={isSeeking()} class={`${isSeeking() ? "cursor-not-allowed opacity-40" : ""} w-full p-3 text-xl border border-slate-700`} type="text" placeholder="Numéro de cabine à rechercher" />
+                        {/* //61R00132 */}
+                        <input value={cabSearch} onkeydown={(e) => { if (e.key.toUpperCase() == "ENTER") { onSearchClick() } }} ref={inputRef} disabled={isSeeking()} class={`${isSeeking() ? "cursor-not-allowed opacity-40" : ""} w-full p-3 text-xl border border-slate-700`} type="text" placeholder="Numéro de cabine à rechercher" />
                         <button disabled={isSeeking()} onClick={onSearchClick} class={`${isSeeking() ? `cursor-not-allowed opacity-40` : `hover:bg-slate-600`}  w-11 bg-slate-700 shrink-0 p-2 `}>
                             <svg xmlns="http://www.w3.org/2000/svg" class="fill-white" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" /></svg>
                         </button>
@@ -175,7 +178,7 @@ export default function SearchSheets(props: IProps) {
                         <i>{processedSheetCount()} feuille(s) traitée(s) <Show when={!isSeeking()}><span class="text-green-700">&#x2713;</span></Show></i>
                     </div>
                     <div>
-                        <i>{referenceFoundCount()} référence(s) trouvée(s) <Show when={!isSeeking()}><span class="text-green-700">&#x2713;</span></Show></i>
+                        <i>{referenceFoundCount()} référence(s) trouvée(s) <Show when={!isSeeking()}>{referenceFoundCount() != 0 ? <span class="text-green-700">&#x2713;</span> : <span class="text-red-700">&#x2715;</span>}</Show></i>
                     </div>
                 </Show>
             </div>
