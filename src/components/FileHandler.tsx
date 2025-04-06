@@ -42,7 +42,7 @@ export default function FileHandler(props: { ref: any }) {
         currentTarget: HTMLInputElement;
         target: HTMLInputElement;
     }) => {
-        setFileStore("files", (prevFiles) => [...prevFiles, ...Array.from(e.target.files!)]);
+        setFileStore("files", (prevFiles) => [...prevFiles, ...Array.from(e.target.files!).filter((file) => file.name.endsWith(excelExtension))]);
         e.target.value = "";
     }
 

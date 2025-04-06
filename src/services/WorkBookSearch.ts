@@ -77,8 +77,9 @@ export class WorkBookSearch {
                         sheetNamesToSkip: this.sheetNamesToSkip
                     });
                 } else {
+                    worker.terminate();
                     activeWorkers--;
-                    if (activeWorkers === 0) {
+                    if (activeWorkers == 0) {
                         resolve(this.auditVisitReports);
                     }
                 }
