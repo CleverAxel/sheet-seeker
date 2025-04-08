@@ -1,6 +1,6 @@
 import { onCleanup } from "solid-js";
 
-export default function clickOutside(el:any, accessor:any) {
+export function clickOutside(el:any, accessor:any) {
     const onClick = (e:Event) => !el.contains(e.target) && accessor()?.();
     document.body.addEventListener("click", onClick);
   

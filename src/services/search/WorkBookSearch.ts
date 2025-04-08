@@ -1,4 +1,5 @@
-import "./../extensions/string.extension"
+import "@/extensions/string.extension"
+import { IAuditVisitReportWithDuplicates } from "@/types/workbook";
 import { Setter } from "solid-js";
 
 
@@ -45,11 +46,11 @@ export class WorkBookSearch {
     private setReferenceFoundCount!: Setter<number>;
 
     constructor(files: File[], sheetNamesToSkip: string[] = []) {
-        this.sheetNamesToSkip = sheetNamesToSkip.map((name) => this.normalizeString(name));
+        this.sheetNamesToSkip = sheetNamesToSkip.map((name) => this.normalizeValue(name));
         this.files = files;
 
         for (let i = 0; i < this.webWorkers.length; i++) {
-            this.webWorkers[i] = new Worker(new URL("./WebWorkerExcel.ts", import.meta.url), { type: "module" });
+            this.webWorkers[i] = new Worker(new URL("@/services/excel/WebWorkerExcel.ts", import.meta.url), { type: "module" });
         }
     }
 
@@ -65,7 +66,7 @@ export class WorkBookSearch {
 
     public startSeeking(cabRef: string): Promise<IAuditVisitReport[]> {
         return new Promise((resolve) => {
-            this.cabRefToSearch = this.normalizeString(cabRef);
+            this.cabRefToSearch = this.normalizeValue(cabRef);
             let activeWorkers = this.webWorkers.length;
 
             const tryDispatchFile = (worker: Worker) => {
@@ -100,15 +101,61 @@ export class WorkBookSearch {
                 tryDispatchFile(worker);
             }
         });
-        
+
     }
 
-    private normalizeString(str: string): string {
-        try {
-            return str._removeUselessBlanks()._toAscii().toUpperCase();
-        } catch (e) {
-            return "";
+    public filterUniqueReports(reports: IAuditVisitReport[]) : IAuditVisitReportWithDuplicates[] {
+        const uniqueReports: IAuditVisitReportWithDuplicates[] = [];
+
+        const seenReports = new Map<string, IAuditVisitReportWithDuplicates>();  // To track unique reports with duplicates
+
+        for (const report of reports) {
+            const normalizedReport = {
+                filename: report.filename,
+                sheetName: report.sheetName,
+                assignmentOrder: this.normalizeValue(report.assignmentOrder),
+                cabNumber: this.normalizeValue(report.cabNumber),
+                address: this.normalizeValue(report.address),
+                date: this.normalizeValue(report.date),
+                technician: this.normalizeValue(report.technician),
+                baseOfReview: this.normalizeValue(report.baseOfReview),
+                referenceArticle: this.normalizeValue(report.referenceArticle),
+                groundDiagram: this.normalizeValue(report.groundDiagram),
+                operatingVoltage: this.normalizeValue(report.operatingVoltage),
+                groundingDevice: this.normalizeValue(report.groundingDevice),
+                disconnectedGroundMeasurement: this.normalizeValue(report.disconnectedGroundMeasurement),
+                conclusion: this.normalizeValue(report.conclusion),
+                infringementsAndComments: report.infringementsAndComments.map(inf => ({
+                    infringement: this.normalizeValue(inf.infringement),
+                    comments: this.normalizeValue(inf.comments)
+                }))
+            };
+
+            const { filename, sheetName, ...reportWithoutFilenameAndSheetName } = normalizedReport;
+            const reportKey = JSON.stringify(reportWithoutFilenameAndSheetName);
+
+            if (seenReports.has(reportKey)) {
+                seenReports.get(reportKey)?.duplicates.push({ filename: filename, sheetName: sheetName });
+            } else {
+                seenReports.set(reportKey, { report: normalizedReport, duplicates: [{ filename: filename, sheetName: sheetName }] });
+            }
         }
+
+        uniqueReports.push(...Array.from(seenReports.values()));
+        return uniqueReports.map((report) => {
+            return {
+                report: report.report,
+                duplicates: report.duplicates.filter(d => d.filename != report.report.filename)
+            }
+        });
+    }
+
+    private normalizeValue(value: any): string {
+        if(typeof value == "string"){
+            return value._removeUselessBlanks()._toAscii().toUpperCase();
+        }
+
+        return value;
     }
 
 

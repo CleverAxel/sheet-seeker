@@ -1,4 +1,4 @@
-export enum EnumSheetField {
+export enum EnumAuditReportField {
     cabNumber = "C7",
     address = "C10",
     date = "C13",
@@ -12,13 +12,9 @@ export enum EnumSheetField {
     conclusion = "C55",
 }
 
-export enum EnumAssignmentOrder {
-    first = "C4",
-    second = "D4",
-    third = "E4",
-    forth = "F4",
-    fifth = "G4",
-}
+export const EnumAssignmentOrder = [
+    "C4", "D4", "E4", "F4", "G4"
+];
 
 export const EnumInfringementsWithComments = [
     { infringement: "I4", comment: "K4" },

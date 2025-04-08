@@ -1,9 +1,9 @@
 /// <reference lib="webworker" />
 
 import ExcelJS from 'exceljs';
-import { IInfringementAndComments, IAuditVisitReport } from "./WorkBookSearch";
-import "./../extensions/string.extension"
-import { EnumAssignmentOrder, EnumInfringementsWithComments, EnumSheetField } from "../enums/sheetField";
+import { IInfringementAndComments, IAuditVisitReport } from "@/types/workbook";
+import "@/extensions/string.extension"
+import { EnumAssignmentOrder, EnumInfringementsWithComments, EnumAuditReportField } from "@/enums/auditReportField";
 
 const worker: DedicatedWorkerGlobalScope = self as any;
 // const self = globalThis as unknown as DedicatedWorkerGlobalScope;
@@ -30,7 +30,7 @@ worker.onmessage = ({ data }) => {
                     return;
                 }
 
-                if (getCellValue(sheet.getCell(EnumSheetField.cabNumber)) && normalizeString(getCellValue(sheet.getCell(EnumSheetField.cabNumber)) as string) == search) {
+                if (getCellValue(sheet.getCell(EnumAuditReportField.cabNumber)) && normalizeString(getCellValue(sheet.getCell(EnumAuditReportField.cabNumber)) as string) == search) {
 
                     let infringements: IInfringementAndComments[] = [];
 
@@ -40,21 +40,26 @@ worker.onmessage = ({ data }) => {
                         }
                     })
 
+                    let assignementOrder:string[] = [];
+                    EnumAssignmentOrder.forEach((field) => {
+                        assignementOrder.push(getCellValue(sheet.getCell(field)));
+                    })
+
                     let report: IAuditVisitReport = {
                         filename: file.name,
                         sheetName : sheet.name,
-                        assignmentOrder: getCellValue(sheet.getCell(EnumAssignmentOrder.first)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.second)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.third)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.forth)) + " " + getCellValue(sheet.getCell(EnumAssignmentOrder.fifth)),
-                        cabNumber: getCellValue(sheet.getCell(EnumSheetField.cabNumber)),
-                        date: getCellValue(sheet.getCell(EnumSheetField.date)) instanceof Date ? formatDateToString(getCellValue(sheet.getCell(EnumSheetField.date))) : getCellValue(sheet.getCell(EnumSheetField.date)),
-                        address: getCellValue(sheet.getCell(EnumSheetField.address)),
-                        technician: getCellValue(sheet.getCell(EnumSheetField.technician)),
-                        baseOfReview: getCellValue(sheet.getCell(EnumSheetField.baseOfReview)),
-                        referenceArticle: getCellValue(sheet.getCell(EnumSheetField.referenceArticle)),
-                        operatingVoltage: getCellValue(sheet.getCell(EnumSheetField.operatingVoltage)),
-                        groundingDevice: getCellValue(sheet.getCell(EnumSheetField.groundingDevice)),
-                        groundDiagram: getCellValue(sheet.getCell(EnumSheetField.groundDiagram)),
-                        disconnectedGroundMeasurement: getCellValue(sheet.getCell(EnumSheetField.disconnectedGroundMeasurement)),
-                        conclusion: getCellValue(sheet.getCell(EnumSheetField.conclusion)),
+                        assignmentOrder: assignementOrder.join(" "),
+                        cabNumber: getCellValue(sheet.getCell(EnumAuditReportField.cabNumber)),
+                        date: getCellValue(sheet.getCell(EnumAuditReportField.date)) instanceof Date ? formatDateToString(getCellValue(sheet.getCell(EnumAuditReportField.date))) : getCellValue(sheet.getCell(EnumAuditReportField.date)),
+                        address: getCellValue(sheet.getCell(EnumAuditReportField.address)),
+                        technician: getCellValue(sheet.getCell(EnumAuditReportField.technician)),
+                        baseOfReview: getCellValue(sheet.getCell(EnumAuditReportField.baseOfReview)),
+                        referenceArticle: getCellValue(sheet.getCell(EnumAuditReportField.referenceArticle)),
+                        operatingVoltage: getCellValue(sheet.getCell(EnumAuditReportField.operatingVoltage)),
+                        groundingDevice: getCellValue(sheet.getCell(EnumAuditReportField.groundingDevice)),
+                        groundDiagram: getCellValue(sheet.getCell(EnumAuditReportField.groundDiagram)),
+                        disconnectedGroundMeasurement: getCellValue(sheet.getCell(EnumAuditReportField.disconnectedGroundMeasurement)),
+                        conclusion: getCellValue(sheet.getCell(EnumAuditReportField.conclusion)),
                         infringementsAndComments: infringements
                     }
                     reports.push(report);
